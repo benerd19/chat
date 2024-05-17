@@ -3,9 +3,9 @@
     <div class="modal">
         <p class="modal__text">Login</p>
         <p class="email">Email</p>
-        <input type="text" v-model="email">
+        <input type="text" v-model="email" tabindex="1">
         <p class="password">Password</p>
-        <input type="password" v-model="password">
+        <input type="password" v-model="password" @keypress.enter="enterName" tabindex="2">
         <button @click="enterName">Enter Name</button>
         <p class="error" v-if="isFound">User not found</p>
     </div>

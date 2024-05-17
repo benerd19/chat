@@ -1,25 +1,22 @@
 <template>
   <UserModal v-if="!isLogIn" @log="LogIn"/>
   <div class="chat__wrapper" v-else>
-    <div class="chat">
-        <div v-for="message in messages" :key="message.id" :class="['message__wrapper', {'message__wrapper--self': user === message.users_email}]">
-          <div class="message">{{ message.text }}</div>
-        </div>
+    <div class="chat" id="chat">
+        <chatMessage v-for="message in messages" :key="message.id" :class="{'message__wrapper--self': user === message.users_email}" :user="message.users_email" :text="message.text"/>
       <div class="send">
-        <input type="text" v-model="message">
+        <input type="text" v-model="message" @keypress.enter="sendMessage">
         <button @click="sendMessage">Send</button>
       </div>
     </div>
   </div>
-  
 </template>
 
 <script setup>
+import chatMessage from './components/ChatMessage.vue'
 import { io } from 'socket.io-client'
 import UserModal from './components/UserModal.vue'
-import { ref, defineModel } from 'vue'
+import { ref, defineModel, watch } from 'vue'
 const isLogIn = ref(false)
-let id = 0
 const user = ref()
 const message = defineModel()
 const messages = ref([])
@@ -28,6 +25,7 @@ const socket = io(`${import.meta.env.VITE_SERVER}`)
 socket.on('message', (mess) => {
   messages.value.push(mess)
 })
+
 async function LogIn(email, nickname){
   user.value = email
   isLogIn.value = true
@@ -76,6 +74,7 @@ async function sendMessage(){
   overflow-x:hidden;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap:10px
 }
 
@@ -130,14 +129,4 @@ async function sendMessage(){
   align-self: flex-end;
 }
 
-.message{
-  display: inline-block;
-  font-size: 20px;
-  color:white;
-  background-color: black;
-  border-radius: 10px;
-  padding: 10px;
-  max-width: 1536px;
-  word-break: break-all
-}
 </style>
