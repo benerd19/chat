@@ -7,8 +7,7 @@
         </div>
       <div class="send">
         <input type="text" v-model="message">
-        <button @click="sendMessage" v-if="user">Send</button>
-        <button @click="sendName" v-else>Enter name</button>
+        <button @click="sendMessage">Send</button>
       </div>
     </div>
   </div>
@@ -20,37 +19,36 @@ import { io } from 'socket.io-client'
 import UserModal from './components/UserModal.vue'
 import { ref, defineModel } from 'vue'
 const isLogIn = ref(false)
-const nickName = ref()
 let id = 0
 const user = ref()
 const message = defineModel()
 const messages = ref([])
-//const socket = io('http://26.114.49.113:3000/')
+const socket = io(`${import.meta.env.VITE_SERVER}`)
 
-// socket.on('message', (mess) => {
-//   mess.id = id
-//   messages.value.push(mess)
-// })
+socket.on('message', (mess) => {
+  messages.value.push(mess)
+})
 async function LogIn(email, nickname){
   user.value = email
-  nickName.value = nickname
   isLogIn.value = true
-  const fetchData = await fetch('http://localhost:3000/messages')
+  const fetchData = await fetch(`${import.meta.env.VITE_SERVER}/messages`)
   const data = await fetchData.json()
   data.forEach((e) => {
     messages.value.push(e)
   })
 }
 
-function sendName(){
-  if(message.value) user.value = message.value
-  message.value = ''
-}
-
-function sendMessage(){
+async function sendMessage(){
     if (message.value && message.value !== ''){
       const msg = {user: user.value, text: message.value}
-      socket.emit('message', msg)
+      const fetchData = await fetch(`${import.meta.env.VITE_SERVER}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({email: user.value, text: message.value}),
+        headers:{ 'Content-Type':'application/json'}, 
+      })
+      const data = await fetchData.json()
+      messages.value.push(data)
+      socket.emit('message', {id:data.id, text:data.text, users_email:data.users_email})
       message.value = ''
     } 
 }

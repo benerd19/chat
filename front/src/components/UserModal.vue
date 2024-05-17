@@ -14,14 +14,6 @@
 
 <script setup>
 import { defineModel, ref, defineEmits } from 'vue'
-    // fetch('http://localhost:3000/users/test@test.com',{
-    //     method: 'POST',
-    //     headers:{
-    //         'Content-Type':'application/json'
-    //     },
-    //     body:
-    //         JSON.stringify({password: '123456'})
-    // })
 const emit = defineEmits(['log'])
 const email = ref('')
 const password = ref('')
@@ -29,7 +21,7 @@ const isFound = ref(false)
 async function enterName(){
     try{
     if (email.value === '' || password.value === '') throw new Error('Empty inputs')    
-    const data = await fetch(`http://localhost:3000/users/${email.value}`, {
+    const data = await fetch(`${import.meta.env.VITE_SERVER}/users/${email.value}`, {
         method: 'POST',
         headers:{
             'Content-Type':'application/json'

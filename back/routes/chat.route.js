@@ -2,7 +2,7 @@ const Router = require('express')
 const router = new Router()
 const chatControllers = require('../controllers/chat.controllers')
 
-router.post('', chatControllers.getMessages)
+router.post('', chatControllers.createMessage)
 router.get('', chatControllers.getAllMessages)
 
 
