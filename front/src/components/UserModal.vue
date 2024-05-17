@@ -1,0 +1,99 @@
+<template>
+<div class="modal__wrapper">
+    <div class="modal">
+        <p class="modal__text">Login</p>
+        <p class="email">Email</p>
+        <input type="text" v-model="email">
+        <p class="password">Password</p>
+        <input type="text" v-model="password">
+        <button @click="enterName">Enter Name</button>
+    </div>
+</div>
+</template>
+
+<script setup>
+import { defineModel, ref, defineEmits } from 'vue'
+    // fetch('http://localhost:3000/users/test@test.com',{
+    //     method: 'POST',
+    //     headers:{
+    //         'Content-Type':'application/json'
+    //     },
+    //     body:
+    //         JSON.stringify({password: '123456'})
+    // })
+const emit = defineEmits(['log'])
+const email = ref()
+const password = ref()
+async function enterName(){
+    const data = await fetch(`http://localhost:3000/users/${email.value}`, {
+        method: 'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:
+            JSON.stringify({password: password.value})
+    })
+    if (data.status === 404) console.log('Hi')
+    else{
+        const clearData = await data.json()
+        emit('log', clearData.email, clearData.nickname)
+    }
+}
+
+</script>
+
+<style scoped>
+.modal__wrapper{
+    margin-top: 150px;
+    display: flex;
+    justify-content: center;
+}
+.modal{
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: column;
+    width: auto;
+    border: 2px solid black;
+    border-radius: 10px;
+}
+
+p{
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.email{
+    align-self: flex-start;
+}
+
+.password{
+    align-self: flex-start;
+}
+
+.modal input{
+    width: 250px;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    border: 2px solid black
+}
+
+.modal button{
+    font-size: 14px;
+    font-weight: 700;
+    width: 100px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: white;
+    border: 2px solid black;
+    transition: 0.2s;
+}
+
+.modal button:hover{
+    background-color: black;
+    color:white;
+    border: 2px solid black;
+}
+</style>
