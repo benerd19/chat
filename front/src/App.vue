@@ -2,7 +2,7 @@
   <UserModal v-if="!isLogIn" @log="LogIn"/>
   <div class="chat__wrapper" v-else>
     <div class="chat">
-        <div v-for="message in messages" :key="message.id" :class="['message__wrapper', {'message__wrapper--self': user === message.user}]">
+        <div v-for="message in messages" :key="message.id" :class="['message__wrapper', {'message__wrapper--self': user === message.users_email}]">
           <div class="message">{{ message.text }}</div>
         </div>
       <div class="send">
@@ -31,10 +31,15 @@ const messages = ref([])
 //   mess.id = id
 //   messages.value.push(mess)
 // })
-function LogIn(email, nickname){
+async function LogIn(email, nickname){
   user.value = email
   nickName.value = nickname
   isLogIn.value = true
+  const fetchData = await fetch('http://localhost:3000/messages')
+  const data = await fetchData.json()
+  data.forEach((e) => {
+    messages.value.push(e)
+  })
 }
 
 function sendName(){

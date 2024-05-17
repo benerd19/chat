@@ -5,8 +5,9 @@
         <p class="email">Email</p>
         <input type="text" v-model="email">
         <p class="password">Password</p>
-        <input type="text" v-model="password">
+        <input type="password" v-model="password">
         <button @click="enterName">Enter Name</button>
+        <p class="error" v-if="isFound">User not found</p>
     </div>
 </div>
 </template>
@@ -22,9 +23,12 @@ import { defineModel, ref, defineEmits } from 'vue'
     //         JSON.stringify({password: '123456'})
     // })
 const emit = defineEmits(['log'])
-const email = ref()
-const password = ref()
+const email = ref('')
+const password = ref('')
+const isFound = ref(false)
 async function enterName(){
+    try{
+    if (email.value === '' || password.value === '') throw new Error('Empty inputs')    
     const data = await fetch(`http://localhost:3000/users/${email.value}`, {
         method: 'POST',
         headers:{
@@ -32,17 +36,25 @@ async function enterName(){
         },
         body:
             JSON.stringify({password: password.value})
-    })
-    if (data.status === 404) console.log('Hi')
-    else{
-        const clearData = await data.json()
-        emit('log', clearData.email, clearData.nickname)
+        })
+    if (data.status === 404) throw new Error('Not found')
+    const clearData = await data.json()
+    emit('log', clearData.email, clearData.nickname)
+    }
+    catch(e)
+    {
+        if(e.message === 'Not found') isFound.value = true
     }
 }
+
 
 </script>
 
 <style scoped>
+.error{
+    color: red;
+    font-size: 14px;
+}
 .modal__wrapper{
     margin-top: 150px;
     display: flex;
