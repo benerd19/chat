@@ -15,15 +15,17 @@ class userController{
     }
 
     async checkUser(req, res){
-        console.log(req.body.password)
+        try{
         const data = await connection.query(`select * from users where email='${req.params.email}'`)
-        if (bcrypt.compareSync(req.body.password, data[0][0].password)) {    
-            delete data[0][0].password
-            res.json(data[0][0])    
+        if (data[0].length === 0) throw new Error('Not found') 
+        if (!bcrypt.compareSync(req.body.password, data[0][0].password)) throw new Error('Not found')
+        delete data[0][0].password
+        res.json(data[0][0])
         }
-        else{
+        catch(e)
+        {
             res.status(404)
-            res.json('Not found')
+            res.json(e.message)
         }
     }
 }
