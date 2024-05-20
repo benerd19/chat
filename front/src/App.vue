@@ -2,7 +2,12 @@
   <UserModal v-if="!isLogIn" @log="LogIn"/>
   <div class="chat__wrapper" v-else>
     <div class="chat" id="chat">
-        <chatMessage v-for="message in messages" :key="message.id" :class="{'message__wrapper--self': user === message.users_email}" :user="message.users_email" :text="message.text"/>
+        <chatMessage v-for="message in messages" 
+        :key="message.id" 
+        :class="{'message__wrapper--self': user === message.users_email}" 
+        :user="message.nickname" 
+        :text="message.text"
+        :isAnother="user === message.users_email" />
       <div class="send">
         <input type="text" v-model="message" @keypress.enter="sendMessage">
         <button @click="sendMessage">Send</button>
@@ -18,6 +23,7 @@ import UserModal from './components/UserModal.vue'
 import { ref, defineModel, watch } from 'vue'
 const isLogIn = ref(false)
 const user = ref()
+const nickname = ref()
 const message = defineModel()
 const messages = ref([])
 const socket = io(`${import.meta.env.VITE_SERVER}`)
@@ -26,10 +32,11 @@ socket.on('message', (mess) => {
   messages.value.push(mess)
 })
 
-async function LogIn(email, nickname){
+async function LogIn(email, nick){
   user.value = email
+  nickname.value = nick
   isLogIn.value = true
-  const fetchData = await fetch(`${import.meta.env.VITE_SERVER}/messages`)
+  const fetchData = await fetch(`${import.meta.env.VITE_SERVER}/messages/all`)
   const data = await fetchData.json()
   data.forEach((e) => {
     messages.value.push(e)
@@ -38,15 +45,7 @@ async function LogIn(email, nickname){
 
 async function sendMessage(){
     if (message.value && message.value !== ''){
-      const msg = {user: user.value, text: message.value}
-      const fetchData = await fetch(`${import.meta.env.VITE_SERVER}/messages`, {
-        method: 'POST',
-        body: JSON.stringify({email: user.value, text: message.value}),
-        headers:{ 'Content-Type':'application/json'}, 
-      })
-      const data = await fetchData.json()
-      messages.value.push(data)
-      socket.emit('message', {id:data.id, text:data.text, users_email:data.users_email})
+      socket.emit('message', {text:message.value, email:user.value})
       message.value = ''
     } 
 }

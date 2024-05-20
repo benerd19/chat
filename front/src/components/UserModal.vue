@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { defineModel, ref, defineEmits } from 'vue'
+import { defineModel, ref } from 'vue'
 const emit = defineEmits(['log'])
 const email = ref('')
 const password = ref('')

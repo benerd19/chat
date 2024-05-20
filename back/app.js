@@ -6,6 +6,7 @@ const { Server } = require("socket.io")
 const cors = require('cors')
 const userRouter = require('./routes/user.route')
 const chatRouter = require('./routes/chat.route')
+const db = require('./db')
 
 app.use(express.json())
 app.use(cors({origin: '*'}))
@@ -21,8 +22,10 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     console.log('user connected')
-    socket.on('message', (message) => {
-       socket.broadcast.emit('message', message)
+    socket.on('message', async (message) => {
+        const data = await db.query(`insert into messages (text, users_email) values ('${message.text}', '${message.email}')`)
+        const nickname = await db.query(`select nickname from users where email='${message.email}'`)
+        io.emit('message', {id: data[0].insertId, text:message.text, users_email: message.email, nickname:nickname[0][0].nickname})
     })
     
     socket.on('disconnect', () => {
