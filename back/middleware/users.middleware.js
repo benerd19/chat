@@ -1,6 +1,8 @@
-function userMiddle(req, res, next){
-    //console.log(req.headers)
+function changingToken(req, res, next){
+    req.headers.authorization = req.headers.authorization.replace('Bearer ', '')
     next()
 }
 
-exports.userMiddle = userMiddle
+module.exports = {
+    changingToken
+}

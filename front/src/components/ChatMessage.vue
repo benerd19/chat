@@ -1,7 +1,7 @@
 <template>
   <div>
       <div class="message">
-        <p>{{ props.user }}</p>
+        <p class="message__user">{{ props.user }}</p>
         <div :class="['message__wrapper', {'message__wrapper--another' : !props.isAnother}]">
           <div class="message__text">{{ props.text }}</div>
         </div>
@@ -33,6 +33,11 @@ p{
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.message__user{
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .message__text{

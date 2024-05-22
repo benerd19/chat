@@ -11,7 +11,6 @@ class Chat{
     }
     async createMessage(req, res){
         const data = await db.query(`insert into messages (text, users_email) values ('${req.body.text}', '${req.body.email}')`)
-        //const nickname = await db.query(`select nickname from users where email=test@test.com`)
         res.json({id: data[0].insertId, text: req.body.text, users_email:req.body.email})
     }
     async getAllMessagesWithEmail(req, res){
