@@ -9,6 +9,17 @@ class userController{
         res.json(data[0])
     }
 
+    async getEmail(req, res){
+        try{
+            const email = jwt.verify(req.headers.authorization, process.env.secret_token)
+            res.json({email:email})
+        }
+        catch(e){
+            console.log(e)
+            res.sendStatus(500)
+        }
+    }
+
     async createUser(req, res){
         try{
             const pass = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10))

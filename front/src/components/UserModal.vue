@@ -1,13 +1,30 @@
 <template>
 <div class="modal__wrapper">
-    <div class="modal">
-        <p class="modal__text">Login</p>
+    <div class="modal" v-if="status === 'login'">
+        <div class="modal__buttons">
+            <button class="modal__change-buttons" @click="status='login'; isError = false">Login</button>
+            <button class="modal__change-buttons" @click="status='create'; isError = false">Create</button>
+        </div>
         <p class="email">Email</p>
         <input type="text" v-model="email" tabindex="1">
         <p class="password">Password</p>
-        <input type="password" v-model="password" @keypress.enter="enterName" tabindex="2">
-        <button @click="enterName">Enter Name</button>
-        <p class="error" v-if="isFound">User not found</p>
+        <input type="password" v-model="password" tabindex="2">
+        <button @click="logIn" class="modal__button">Enter</button>
+        <p class="error" v-if="isError">{{ errorMessage }}</p>
+    </div>
+    <div class="modal" v-if="status === 'create'">
+        <div class="modal__buttons">
+            <button class="modal__change-buttons" @click="status='login'; isError = false">Login</button>
+            <button class="modal__change-buttons" @click="status='create'; isError = false">Create</button>
+        </div>
+        <p class="email">Email</p>
+        <input type="text" v-model="email" tabindex="1">
+        <p class="password">Password</p>
+        <input type="password" v-model="password" tabindex="2">
+        <p class="name">Name</p>
+        <input type="text" v-model="nickname" tabindex="3">        
+        <button @click="createUser" class="modal__button">Enter</button>
+        <p class="error" v-if="isError">{{ errorMessage }}</p>
     </div>
 </div>
 </template>
@@ -15,27 +32,54 @@
 <script setup>
 import { defineModel, ref } from 'vue'
 const emit = defineEmits(['log'])
+const status = ref('login')
+const nickname = ref('')
 const email = ref('')
 const password = ref('')
-const isFound = ref(false)
-async function enterName(){
+const errorMessage = ref('Error')
+const isError = ref(false)
+async function createUser(){
     try{
-    if (email.value === '' || password.value === '') throw new Error('Empty inputs')    
-    const data = await fetch(`${import.meta.env.VITE_SERVER}/users/${email.value}`, {
-        method: 'POST',
-        headers:{
-            'Content-Type':'application/json'
-        },
-        body:
-            JSON.stringify({password: password.value})
+        isError.value = false
+        if (email.value === '' || password.value === '' || nickname.value === '') throw new Error('Empty fields')
+        const fetchData = await fetch(`${import.meta.env.VITE_SERVER}/users`, {
+            method: 'POST',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify({email: email.value, password: password.value, nickname:nickname.value})
         })
-    if (data.status === 404) throw new Error('Not found')
-    const clearData = await data.json()
-    emit('log', clearData.email, clearData.nickname)
+        if (fetchData.status === 400) throw new Error('User exists')
+        const data = await fetchData.json()
+        localStorage.setItem('token', data.token)
+        // console.log(data)
     }
-    catch(e)
-    {
-        if(e.message === 'Not found') isFound.value = true
+    catch(e){
+        isError.value = true
+        errorMessage.value = e.message 
+    }
+}
+
+async function logIn(){
+    try{
+        isError.value = false
+        if (email.value === '' || password.value === '') throw new Error('Empty fields')    
+        const data = await fetch(`${import.meta.env.VITE_SERVER}/users/${email.value}`, {
+            method: 'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:
+                JSON.stringify({password: password.value})
+            })
+        if (data.status === 403) throw new Error('Not found')
+        const clearData = await data.json()
+        localStorage.setItem('token', clearData.token)
+        //console.log(clearData)
+        emit('log', clearData.nickname)
+    }
+    catch(e){
+        isError.value = true
+        errorMessage.value = e.message
+        console.log(e)
     }
 }
 
@@ -43,6 +87,29 @@ async function enterName(){
 </script>
 
 <style scoped>
+.modal__buttons{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.modal__change-buttons{
+    font-size: 16px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: white;
+    border: 2px solid transparent;
+    transition: 0.2s;
+}
+
+.modal__change-buttons:hover{
+    background-color: black;
+    color:white;
+    border: 2px solid black;
+}
+
+
 .error{
     color: red;
     font-size: 14px;
@@ -51,6 +118,7 @@ async function enterName(){
     margin-top: 150px;
     display: flex;
     justify-content: center;
+    transition: 0.2s;
 }
 .modal{
     padding: 30px;
@@ -61,6 +129,7 @@ async function enterName(){
     width: auto;
     border: 2px solid black;
     border-radius: 10px;
+    transition: 0.2s;
 }
 
 p{
@@ -68,11 +137,7 @@ p{
     font-weight: 600;
 }
 
-.email{
-    align-self: flex-start;
-}
-
-.password{
+.email, .password, .name{
     align-self: flex-start;
 }
 
@@ -84,7 +149,7 @@ p{
     border: 2px solid black
 }
 
-.modal button{
+.modal__button{
     font-size: 14px;
     font-weight: 700;
     width: 100px;
@@ -95,7 +160,7 @@ p{
     transition: 0.2s;
 }
 
-.modal button:hover{
+.modal__button:hover{
     background-color: black;
     color:white;
     border: 2px solid black;

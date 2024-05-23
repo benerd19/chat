@@ -1,4 +1,4 @@
-const dotenv = require('dotenv').config()
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const http = require('http')
@@ -7,6 +7,7 @@ const cors = require('cors')
 const userRouter = require('./routes/user.route')
 const chatRouter = require('./routes/chat.route')
 const db = require('./db')
+const jwt = require('jsonwebtoken')
 
 app.use(express.json())
 app.use(cors({origin: '*'}))

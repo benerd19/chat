@@ -11,7 +11,7 @@
 
 <script setup>
 const props = defineProps(['text', 'user', 'isAnother'])
-console.log(props.isAnother)
+//console.log(props.isAnother)
 </script>
 
 <style scoped>
